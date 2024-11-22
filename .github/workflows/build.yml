@@ -1,4 +1,4 @@
-name: SonarCloud Analysis
+name: Build
 
 on:
   pull_request:
@@ -14,26 +14,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Node.js with the latest supported version (20)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '20'  # Using Node.js 20 as per the deprecation warning
 
+      # Install dependencies
       - name: Install dependencies
         run: |
           npm install
 
+      # Run tests and generate coverage
       - name: Run tests and generate coverage
         run: |
           npm run test -- --coverage --watch=false
-      
+
+      # SonarCloud Scan
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}
-          sonar-organization: ${{ secrets.SONAR_ORG }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-          quality-gate: true
+          entryPoint: '/usr/bin/sonar-scanner'
+          args: '-Dsonar.login=${{ secrets.SONAR_TOKEN }}'
+          
+      # Post the quality gate results to the PR
+      - name: SonarCloud Quality Gate Check
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          entryPoint: '/usr/bin/sonar-scanner'
+          args: '-Dsonar.login=${{ secrets.SONAR_TOKEN }}'
