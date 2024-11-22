@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-      
+
       - name: Run tests and generate coverage
         run: |
           npm run test -- --coverage --watch=false
@@ -36,19 +36,4 @@ jobs:
           sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}
           sonar-organization: ${{ secrets.SONAR_ORG }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Quality Gate Status
-        uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}
-          sonar-organization: ${{ secrets.SONAR_ORG }}
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
           quality-gate: true
-
-      - name: Post SonarCloud Analysis Report to PR
-        if: github.event.pull_request
-        uses: devops-infra/action-sonarcloud-quality-gate@v1
-        with:
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}
-          sonar-organization: ${{ secrets.SONAR_ORG }}
