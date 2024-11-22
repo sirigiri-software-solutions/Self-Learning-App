@@ -1,33 +1,38 @@
-name: Build
+name: SonarCloud Analysis
 
 on:
   push:
     branches:
       - main
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 jobs:
   sonarcloud:
-    name: SonarQube Cloud
+    name: Analyze with SonarCloud
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Specify your Node.js version
+          node-version: '16'
 
       - name: Install dependencies
-        run: npm install
-
-      - name: SonarQube Cloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          npm install
+      
+      - name: Run tests and generate coverage
+        run: |
+          npm run test -- --coverage --watch=false
+      
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}
+          sonar-organization: ${{ secrets.SONAR_ORG }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
